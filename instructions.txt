@@ -1,8 +1,0 @@
-1. Categories
-In Top I can See Category Management with a back button, this is not important.
-there is no add new category button.
-
-2. Schedule Management
-Same in Top I can See Shedule Management with Back Button, but there is not option to create the Schedule
-
-3. please remove that back button and big heading from tracker and analytics too, make it compact and professional.
