@@ -21,12 +21,15 @@ const PWAInstallPrompt = () => {
 
         // Listen for beforeinstallprompt event
         const handleBeforeInstallPrompt = (e) => {
+            console.log('beforeinstallprompt event fired');
             // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
             // Stash the event so it can be triggered later
             setDeferredPrompt(e);
-            // Show the install prompt
-            setShowInstallPrompt(true);
+            // Show the install prompt after a short delay
+            setTimeout(() => {
+                setShowInstallPrompt(true);
+            }, 2000); // Show after 2 seconds
         };
 
         // Listen for appinstalled event
@@ -42,13 +45,24 @@ const PWAInstallPrompt = () => {
             // Add event listeners
             window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
             window.addEventListener('appinstalled', handleAppInstalled);
+
+            // Check if we should show a manual install prompt for mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile && !deferredPrompt) {
+                // Show manual install prompt for mobile after 5 seconds
+                setTimeout(() => {
+                    if (!isInstalled && !showInstallPrompt) {
+                        setShowInstallPrompt(true);
+                    }
+                }, 5000);
+            }
         }
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
             window.removeEventListener('appinstalled', handleAppInstalled);
         };
-    }, []);
+    }, [deferredPrompt, isInstalled, showInstallPrompt]);
 
     const handleInstallClick = async () => {
         if (!deferredPrompt) return;
@@ -72,6 +86,19 @@ const PWAInstallPrompt = () => {
 
     const handleDismiss = () => {
         setShowInstallPrompt(false);
+    };
+
+    const showManualInstallInstructions = () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+
+        if (isIOS) {
+            alert('To install on iOS:\n1. Tap the Share button (square with arrow)\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
+        } else if (isAndroid) {
+            alert('To install on Android:\n1. Tap the menu button (3 dots)\n2. Tap "Add to Home screen"\n3. Tap "Add"');
+        } else {
+            alert('To install:\n1. Click the install icon in your browser address bar\n2. Or use browser menu: More tools > Create shortcut');
+        }
     };
 
     // Don't show if already installed or no prompt available
@@ -107,10 +134,10 @@ const PWAInstallPrompt = () => {
                 </div>
                 <div className="mt-3 flex space-x-2">
                     <button
-                        onClick={handleInstallClick}
+                        onClick={deferredPrompt ? handleInstallClick : showManualInstallInstructions}
                         className="flex-1 bg-primary-600 text-white text-sm font-medium py-2 px-3 rounded-md hover:bg-primary-700 transition-colors"
                     >
-                        Install
+                        {deferredPrompt ? 'Install' : 'How to Install'}
                     </button>
                     <button
                         onClick={handleDismiss}
