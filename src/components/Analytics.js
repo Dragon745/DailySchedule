@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { db } from '../firebase.config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import indexedDBService from '../services/indexedDB';
 
-const Analytics = ({ user, goBack, navigateToView }) => {
+const Analytics = ({ username, goBack, navigateToView }) => {
     // Predefined main categories (same as CategoryManager) - memoized to prevent recreation
     const predefinedMainCategories = useMemo(() => [
         { id: 'predefined-worship-spiritual', name: 'Worship & Spiritual', color: '#8B5CF6', icon: '🙏' },
@@ -46,31 +45,14 @@ const Analytics = ({ user, goBack, navigateToView }) => {
             setError(null);
 
             // Get time tracking data
-            const trackingQuery = query(
-                collection(db, 'timeTracking'),
-                where('uid', '==', user.uid),
-                where('status', '==', 'completed')
-            );
-
-            const trackingSnapshot = await getDocs(trackingQuery);
-            const trackingData = trackingSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const trackingData = await indexedDBService.query('timeTracking', { status: 'completed' });
 
             // Get categories
-            const categoriesQuery = query(
-                collection(db, 'categories'),
-                where('uid', '==', user.uid),
-                where('isActive', '==', true)
-            );
-
-            const categoriesSnapshot = await getDocs(categoriesQuery);
+            const categoriesData = await indexedDBService.query('categories', { isActive: true });
             const categories = {};
             const mainCategories = {};
 
-            categoriesSnapshot.docs.forEach(doc => {
-                const category = { id: doc.id, ...doc.data() };
+            categoriesData.forEach(category => {
                 // Use document id as the key for categories
                 categories[category.id] = category;
 
@@ -180,13 +162,11 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user, predefinedMainCategories, getStartDate]);
+    }, [username, predefinedMainCategories, getStartDate]);
 
     useEffect(() => {
-        if (user) {
-            loadAnalyticsData();
-        }
-    }, [user, timeRange, loadAnalyticsData]);
+        loadAnalyticsData();
+    }, [timeRange, loadAnalyticsData]);
 
     const formatTime = (minutes) => {
         if (minutes < 60) {

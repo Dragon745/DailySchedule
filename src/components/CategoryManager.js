@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase.config';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
+import indexedDBService from '../services/indexedDB';
 
-const CategoryManager = ({ user, goBack, navigateToView }) => {
+const CategoryManager = ({ username, goBack, navigateToView }) => {
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         name: '',
@@ -66,33 +65,19 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         try {
             setLoading(true);
 
-            // Load user categories
-            const q = query(
-                collection(db, 'categories'),
-                where('uid', '==', user.uid),
-                orderBy('createdAt', 'desc')
-            );
-            const querySnapshot = await getDocs(q);
-            const categoriesData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            // Load categories
+            const categoriesData = await indexedDBService.query('categories', {}, { field: 'createdAt', direction: 'desc' });
             setCategories(categoriesData);
-
-            // Helper functions for hierarchical display
-            // Note: These functions are now defined locally, not on window object
         } catch (error) {
             console.error('Error loading categories:', error);
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
-        if (user) {
-            loadCategories();
-        }
-    }, [user, loadCategories]);
+        loadCategories();
+    }, [loadCategories]);
 
 
 
@@ -100,7 +85,6 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!user) return;
 
         try {
             // Check if this sub-category already exists
@@ -123,7 +107,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                 return;
             }
 
-            // Check if the main category exists in Firestore, if not create it
+            // Check if the main category exists in IndexedDB, if not create it
             const existingMainCategory = categories.find(cat =>
                 cat.type === 'main' && cat.categoryId === formData.parentCategoryId
             );
@@ -131,7 +115,6 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
             if (!existingMainCategory) {
                 // Create the main category first
                 const mainCategoryData = {
-                    uid: user.uid,
                     categoryId: selectedParentCategory.id,
                     name: selectedParentCategory.name,
                     description: `Main category: ${selectedParentCategory.name}`,
@@ -140,19 +123,16 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                     type: 'main',
                     parentCategoryId: null,
                     isActive: true,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
                     totalTimeSpent: 0,
                     totalSessions: 0
                 };
 
-                await addDoc(collection(db, 'categories'), mainCategoryData);
+                await indexedDBService.create('categories', mainCategoryData);
                 console.log(`Created main category: ${selectedParentCategory.name}`);
             }
 
             // Now create/update the sub-category
             const categoryData = {
-                uid: user.uid,
                 categoryId: editingCategory ? editingCategory.id : `cat_${Date.now()}`,
                 name: formData.name,
                 description: formData.description,
@@ -161,16 +141,14 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                 type: 'sub',
                 parentCategoryId: formData.parentCategoryId,
                 isActive: true,
-                createdAt: editingCategory ? editingCategory.createdAt : new Date(),
-                updatedAt: new Date(),
                 totalTimeSpent: editingCategory ? editingCategory.totalTimeSpent || 0 : 0,
                 totalSessions: editingCategory ? editingCategory.totalSessions || 0 : 0
             };
 
             if (editingCategory) {
-                await updateDoc(doc(db, 'categories', editingCategory.id), categoryData);
+                await indexedDBService.update('categories', editingCategory.id, categoryData);
             } else {
-                await addDoc(collection(db, 'categories'), categoryData);
+                await indexedDBService.create('categories', categoryData);
             }
 
             resetForm();
@@ -197,7 +175,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
     const handleDelete = async (categoryId) => {
         if (window.confirm('Are you sure you want to delete this category?')) {
             try {
-                await deleteDoc(doc(db, 'categories', categoryId));
+                await indexedDBService.delete('categories', categoryId);
                 loadCategories();
             } catch (error) {
                 console.error('Error deleting category:', error);

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase.config';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import indexedDBService from '../services/indexedDB';
 
-const Dashboard = ({ user, setCurrentView }) => {
+const Dashboard = ({ username, setCurrentView }) => {
     const [categories, setCategories] = useState([]);
     const [todaySchedules, setTodaySchedules] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,45 +17,24 @@ const Dashboard = ({ user, setCurrentView }) => {
             setLoading(true);
 
             // Load categories
-            const categoriesQuery = query(
-                collection(db, 'categories'),
-                where('uid', '==', user.uid),
-                where('isActive', '==', true),
-                orderBy('createdAt', 'desc')
-            );
-            const categoriesSnapshot = await getDocs(categoriesQuery);
-            const categoriesData = categoriesSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const categoriesData = await indexedDBService.query('categories', { isActive: true }, { field: 'createdAt', direction: 'desc' });
             setCategories(categoriesData);
-
-            // Helper functions for hierarchical display
-            // Note: These functions are now defined locally, not on window object
 
             // Load today's schedules
             const today = new Date();
             const dayOfWeek = today.getDay() || 7; // Convert Sunday (0) to 7
 
-            const schedulesQuery = query(
-                collection(db, 'schedules'),
-                where('uid', '==', user.uid),
-                where('isActive', '==', true),
-                where('daysOfWeek', 'array-contains', dayOfWeek),
-                orderBy('startTime')
+            const schedulesData = await indexedDBService.query('schedules', { isActive: true }, { field: 'startTime', direction: 'asc' });
+            const todaySchedulesData = schedulesData.filter(schedule =>
+                schedule.daysOfWeek && schedule.daysOfWeek.includes(dayOfWeek)
             );
-            const schedulesSnapshot = await getDocs(schedulesQuery);
-            const schedulesData = schedulesSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setTodaySchedules(schedulesData);
+            setTodaySchedules(todaySchedulesData);
 
             // Update stats
             setStats({
                 totalCategories: categoriesData.length,
                 totalSchedules: schedulesData.length,
-                todaySchedules: schedulesData.length,
+                todaySchedules: todaySchedulesData.length,
                 completedToday: 0 // This would be calculated from timeTracking collection
             });
 
@@ -65,11 +43,11 @@ const Dashboard = ({ user, setCurrentView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         loadDashboardData();
-    }, [user, loadDashboardData]);
+    }, [username, loadDashboardData]);
 
     const getCurrentTime = () => {
         const now = new Date();
@@ -111,7 +89,7 @@ const Dashboard = ({ user, setCurrentView }) => {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                            {getGreeting()}, {user.displayName}!
+                            {getGreeting()}, {username}!
                         </h1>
                         <p className="text-sm lg:text-lg text-gray-600 mt-1 lg:mt-2">
                             Current time: {getCurrentTime()}

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase.config';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
+import indexedDBService from '../services/indexedDB';
 
-const ScheduleManager = ({ user, goBack, navigateToView }) => {
+const ScheduleManager = ({ username, goBack, navigateToView }) => {
     const [schedules, setSchedules] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -42,33 +41,11 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
             setLoading(true);
 
             // Load categories
-            const categoriesQuery = query(
-                collection(db, 'categories'),
-                where('uid', '==', user.uid),
-                where('isActive', '==', true),
-                orderBy('name')
-            );
-            const categoriesSnapshot = await getDocs(categoriesQuery);
-            const categoriesData = categoriesSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const categoriesData = await indexedDBService.query('categories', { isActive: true }, { field: 'name', direction: 'asc' });
             setCategories(categoriesData);
 
-            // Helper functions for hierarchical display
-            // Note: These functions are now defined locally, not on window object
-
             // Load schedules
-            const schedulesQuery = query(
-                collection(db, 'schedules'),
-                where('uid', '==', user.uid),
-                orderBy('startTime')
-            );
-            const schedulesSnapshot = await getDocs(schedulesQuery);
-            const schedulesData = schedulesSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const schedulesData = await indexedDBService.query('schedules', {}, { field: 'startTime', direction: 'asc' });
             setSchedules(schedulesData);
 
         } catch (error) {
@@ -76,11 +53,11 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         loadData();
-    }, [user, loadData]);
+    }, [loadData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -98,7 +75,6 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
         try {
             const selectedCategory = categories.find(cat => cat.id === formData.categoryId);
             const scheduleData = {
-                uid: user.uid,
                 scheduleId: editingSchedule ? editingSchedule.id : `sch_${Date.now()}`,
                 categoryId: formData.categoryId,
                 categoryName: selectedCategory.name,
@@ -110,18 +86,15 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
                 isRecurring: formData.isRecurring,
                 isActive: true,
                 priority: formData.priority,
-                createdAt: editingSchedule ? editingSchedule.createdAt : new Date(),
-                updatedAt: new Date(),
                 estimatedDuration: calculateDuration(formData.startTime, formData.endTime)
             };
 
             if (editingSchedule) {
                 // Update existing schedule
-                const scheduleRef = doc(db, 'schedules', editingSchedule.id);
-                await updateDoc(scheduleRef, scheduleData);
+                await indexedDBService.update('schedules', editingSchedule.id, scheduleData);
             } else {
                 // Create new schedule
-                await addDoc(collection(db, 'schedules'), scheduleData);
+                await indexedDBService.create('schedules', scheduleData);
             }
 
             // Reset form and reload
@@ -157,7 +130,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
     const handleDelete = async (scheduleId) => {
         if (window.confirm('Are you sure you want to delete this schedule? This action cannot be undone.')) {
             try {
-                await deleteDoc(doc(db, 'schedules', scheduleId));
+                await indexedDBService.delete('schedules', scheduleId);
                 await loadData();
             } catch (error) {
                 console.error('Error deleting schedule:', error);
@@ -168,10 +141,8 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
 
     const handleToggleActive = async (schedule) => {
         try {
-            const scheduleRef = doc(db, 'schedules', schedule.id);
-            await updateDoc(scheduleRef, {
-                isActive: !schedule.isActive,
-                updatedAt: new Date()
+            await indexedDBService.update('schedules', schedule.id, {
+                isActive: !schedule.isActive
             });
             await loadData();
         } catch (error) {

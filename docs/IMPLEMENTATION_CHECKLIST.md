@@ -96,7 +96,7 @@
 
 ### 7. Time Tracker
 
-- [ ] Replace Firestore operations with localStorage
+- [ ] Replace Firestore operations with IndexedDB
 - [ ] Update `loadData` function
 - [ ] Update `startTracking` function
 - [ ] Update `stopTracking` function
@@ -108,7 +108,7 @@
 
 ### 8. Analytics Component
 
-- [ ] Replace Firestore operations with localStorage
+- [ ] Replace Firestore operations with IndexedDB
 - [ ] Update `loadAnalyticsData` function
 - [ ] Update data aggregation logic
 - [ ] Update time range filtering
@@ -184,7 +184,7 @@
 - [ ] Test data operation performance
 - [ ] Test large dataset handling
 - [ ] Test memory usage
-- [ ] Optimize localStorage operations
+- [ ] Optimize IndexedDB operations
 - [ ] Add loading indicators where needed
 
 ### 16. Cross-Browser Testing
@@ -211,7 +211,7 @@
 
 - [ ] Update README.md
 - [ ] Update component documentation
-- [ ] Add localStorage service documentation
+- [ ] Add IndexedDB service documentation
 - [ ] Update deployment instructions
 - [ ] Add migration notes
 - [ ] Document new features
@@ -229,7 +229,7 @@
 
 ### 20. Monitoring & Maintenance
 
-- [ ] Monitor localStorage usage
+- [ ] Monitor IndexedDB usage
 - [ ] Track performance metrics
 - [ ] Gather user feedback
 - [ ] Plan future enhancements
@@ -274,7 +274,7 @@
 - [ ] App load time < 2 seconds
 - [ ] Data operations < 500ms
 - [ ] Smooth navigation
-- [ ] Efficient localStorage usage
+- [ ] Efficient IndexedDB usage
 - [ ] Memory management
 
 ### Compatibility
@@ -298,7 +298,7 @@
 
 ### Data Recovery
 
-1. Check localStorage for user data
+1. Check IndexedDB for user data
 2. Export current data if possible
 3. Provide migration instructions
 4. Support data restoration
@@ -324,7 +324,7 @@
 ### Technical Requirements
 
 - [ ] No Firebase dependencies
-- [ ] Efficient localStorage usage
+- [ ] Efficient IndexedDB usage
 - [ ] Proper error handling
 - [ ] Data validation and integrity
 - [ ] Performance optimization

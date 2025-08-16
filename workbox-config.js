@@ -9,34 +9,7 @@ module.exports = {
 
     // Runtime caching strategies
     runtimeCaching: [
-        // Cache API requests
-        {
-            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*$/,
-            handler: 'NetworkFirst',
-            options: {
-                cacheName: 'daily-schedule-api-v1',
-                expiration: {
-                    maxEntries: 100,
-                    maxAgeSeconds: 60 * 60 * 24, // 1 day
-                },
-                cacheableResponse: {
-                    statuses: [0, 200],
-                },
-            },
-        },
-
-        // Cache Firebase Auth
-        {
-            urlPattern: /^https:\/\/identitytoolkit\.googleapis\.com\/.*$/,
-            handler: 'NetworkFirst',
-            options: {
-                cacheName: 'daily-schedule-auth-v1',
-                expiration: {
-                    maxEntries: 50,
-                    maxAgeSeconds: 60 * 60 * 24, // 1 day
-                },
-            },
-        },
+        // Cache static assets
 
         // Cache static assets
         {

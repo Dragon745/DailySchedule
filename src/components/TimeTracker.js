@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { db } from '../firebase.config';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
+import indexedDBService from '../services/indexedDB';
 
-const TimeTracker = ({ user, goBack, navigateToView }) => {
+const TimeTracker = ({ username, goBack, navigateToView }) => {
     const [categories, setCategories] = useState([]);
     const [activeSessions, setActiveSessions] = useState([]);
     const [recentSessions, setRecentSessions] = useState([]);
@@ -11,37 +10,15 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
     const [lastRefresh, setLastRefresh] = useState(new Date());
 
     const loadData = useCallback(async () => {
-        if (!user) return;
-
         try {
             setLoading(true);
 
             // Load categories
-            const categoriesQuery = query(
-                collection(db, 'categories'),
-                where('uid', '==', user.uid),
-                where('isActive', '==', true),
-                orderBy('name')
-            );
-            const categoriesSnapshot = await getDocs(categoriesQuery);
-            const categoriesData = categoriesSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const categoriesData = await indexedDBService.query('categories', { isActive: true }, { field: 'name', direction: 'asc' });
             setCategories(categoriesData);
 
             // Load active sessions
-            const activeQuery = query(
-                collection(db, 'timeTracking'),
-                where('uid', '==', user.uid),
-                where('status', '==', 'active'),
-                orderBy('startTime', 'desc')
-            );
-            const activeSnapshot = await getDocs(activeQuery);
-            const activeData = activeSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const activeData = await indexedDBService.query('timeTracking', { status: 'active' }, { field: 'startTime', direction: 'desc' });
             setActiveSessions(activeData);
 
             // Set currently tracking if there's an active session
@@ -52,32 +29,20 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
             }
 
             // Load recent sessions
-            const recentQuery = query(
-                collection(db, 'timeTracking'),
-                where('uid', '==', user.uid),
-                where('status', '==', 'completed'),
-                orderBy('startTime', 'desc'),
-                limit(10)
-            );
-            const recentSnapshot = await getDocs(recentQuery);
-            const recentData = recentSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setRecentSessions(recentData);
+            const recentData = await indexedDBService.query('timeTracking', { status: 'completed' }, { field: 'startTime', direction: 'desc' });
+            // Limit to 10 most recent
+            setRecentSessions(recentData.slice(0, 10));
 
         } catch (error) {
             console.error('Error loading data:', error);
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
-        if (user) {
-            loadData();
-        }
-    }, [user, loadData]);
+        loadData();
+    }, [loadData]);
 
     // Auto-refresh timer for active sessions
     useEffect(() => {
@@ -114,7 +79,6 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
     const startTracking = async (subCategory) => {
         try {
             const sessionData = {
-                uid: user.uid,
                 trackingId: `track_${Date.now()}`,
                 categoryId: subCategory.id,
                 categoryName: subCategory.name,
@@ -123,19 +87,12 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
                 startTime: new Date(),
                 status: 'active',
                 notes: '',
-                createdAt: new Date(),
-                updatedAt: new Date(),
                 tags: []
             };
 
-            const docRef = await addDoc(collection(db, 'timeTracking'), sessionData);
+            const newSession = await indexedDBService.create('timeTracking', sessionData);
 
             // Update local state directly instead of reloading everything
-            const newSession = {
-                id: docRef.id,
-                ...sessionData
-            };
-
             setActiveSessions(prev => [newSession, ...prev]);
             setCurrentlyTracking(newSession);
             setLastRefresh(new Date());
@@ -147,7 +104,6 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
 
     const stopTracking = async (sessionId) => {
         try {
-            const sessionRef = doc(db, 'timeTracking', sessionId);
             const endTime = new Date();
 
             const session = activeSessions.find(s => s.id === sessionId);
@@ -155,13 +111,12 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
                 throw new Error('Session not found');
             }
 
-            const duration = endTime - session.startTime.toDate();
+            const duration = endTime - new Date(session.startTime);
 
-            await updateDoc(sessionRef, {
+            await indexedDBService.update('timeTracking', sessionId, {
                 endTime: endTime,
                 status: 'completed',
-                duration: duration,
-                updatedAt: new Date()
+                duration: duration
             });
 
             // Update local state directly instead of reloading everything
@@ -169,8 +124,7 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
                 ...session,
                 endTime: endTime,
                 status: 'completed',
-                duration: duration,
-                updatedAt: endTime
+                duration: duration
             };
 
             setActiveSessions(prev => prev.filter(s => s.id !== sessionId));
@@ -250,11 +204,11 @@ const TimeTracker = ({ user, goBack, navigateToView }) => {
         );
     };
 
-    if (!user) {
+    if (!username) {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                    <p className="text-gray-500 text-lg">Please log in to use the Time Tracker</p>
+                    <p className="text-gray-500 text-lg">Please enter your username to use the Time Tracker</p>
                 </div>
             </div>
         );

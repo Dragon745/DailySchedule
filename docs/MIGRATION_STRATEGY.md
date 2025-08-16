@@ -1,10 +1,10 @@
 # DailySchedule App Migration Strategy
 
-## From Firebase to Local Storage
+## From Firebase to IndexedDB
 
 ### Overview
 
-This document outlines the comprehensive strategy and roadmap for migrating the DailySchedule application from Firebase authentication and Firestore datastore to a local storage-based system with simple username input.
+This document outlines the comprehensive strategy and roadmap for migrating the DailySchedule application from Firebase authentication and Firestore datastore to an IndexedDB-based system with simple username input.
 
 ### Current Architecture Analysis
 
@@ -47,19 +47,19 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
 
    - Remove Google Sign-in
    - Implement simple username input form
-   - Store username in localStorage
+   - Store username in localStorage (for username only)
    - Remove user state management complexity
 
-3. **Create Local Storage Service**
-   - Implement localStorage wrapper for data persistence
+3. **Create IndexedDB Service**
+   - Implement IndexedDB wrapper for data persistence
    - Create data migration utilities
    - Implement data validation and error handling
 
 #### Phase 2: Implement Local Data Management
 
-1. **Local Storage Structure**
+1. **IndexedDB Structure**
 
-   - Use localStorage with JSON serialization
+   - Use IndexedDB with object stores and indexes
    - Implement data versioning for future migrations
    - Add data compression for large datasets
    - Implement backup/export functionality
@@ -72,7 +72,7 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
    - Keep predefined category system
 
 3. **Component Updates**
-   - Replace Firestore queries with localStorage operations
+   - Replace Firestore queries with IndexedDB operations
    - Remove real-time listeners
    - Implement manual refresh mechanisms
    - Add offline-first capabilities
@@ -94,7 +94,7 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
 
 3. **Performance Optimizations**
    - Lazy loading for large datasets
-   - Efficient localStorage operations
+   - Efficient IndexedDB operations
    - Memory management for large collections
 
 ### Detailed Implementation Roadmap
@@ -108,9 +108,9 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
 - [ ] Remove Firebase imports from all components
 - [ ] Clean up unused Firebase-related code
 
-**Day 3-4: Create Local Storage Service**
+**Day 3-4: Create IndexedDB Service**
 
-- [ ] Create `src/services/localStorage.js`
+- [ ] Create `src/services/indexedDB.js`
 - [ ] Implement basic CRUD operations
 - [ ] Add data validation functions
 - [ ] Create data migration utilities
@@ -119,14 +119,14 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
 
 - [ ] Create new `UsernameInput.js` component
 - [ ] Update `App.js` to use username instead of Firebase auth
-- [ ] Implement localStorage-based user session
+- [ ] Implement localStorage-based user session (username only)
 - [ ] Remove Login component and auth state management
 
 #### Week 2: Core Components Migration
 
 **Day 1-2: Dashboard Component**
 
-- [ ] Replace Firestore queries with localStorage operations
+- [ ] Replace Firestore queries with IndexedDB operations
 - [ ] Update data loading logic
 - [ ] Remove user.uid dependencies
 - [ ] Test data persistence
@@ -193,17 +193,19 @@ This document outlines the comprehensive strategy and roadmap for migrating the 
 
 ### Technical Implementation Details
 
-#### Local Storage Service Structure
+#### IndexedDB Service Structure
 
 ```javascript
-// src/services/localStorage.js
-class LocalStorageService {
+// src/services/indexedDB.js
+class IndexedDBService {
   // Data operations
   async get(collection, id) {}
   async getAll(collection) {}
   async create(collection, data) {}
   async update(collection, id, data) {}
   async delete(collection, id) {}
+  async query(collection, filters, sortOptions) {}
+  async getByIndex(collection, indexName, value) {}
 
   // Data management
   exportData() {}
@@ -214,6 +216,7 @@ class LocalStorageService {
   // Utilities
   validateData(data, schema) {}
   migrateData(version) {}
+  createIndex(collection, indexName, keyPath, options) {}
 }
 ```
 
@@ -230,7 +233,7 @@ class LocalStorageService {
 ```javascript
 // Replace Firestore operations
 // Before: const snapshot = await getDocs(query(...))
-// After: const data = await localStorageService.getAll('categories')
+// After: const data = await indexedDBService.getAll('categories')
 
 // Remove user.uid references
 // Before: where('uid', '==', user.uid)
@@ -251,7 +254,7 @@ class LocalStorageService {
    - Mitigation: Implement data pagination and lazy loading
    - Fallback: Add data size warnings and cleanup tools
 
-3. **Browser Storage Limitations**
+3. **IndexedDB Storage Limitations**
    - Mitigation: Implement data compression and cleanup
    - Fallback: Warn users about storage limits
 
@@ -259,7 +262,7 @@ class LocalStorageService {
 
 1. **Data Validation**
 
-   - Mitigation: Comprehensive validation in localStorage service
+   - Mitigation: Comprehensive validation in IndexedDB service
    - Fallback: Graceful error handling and user notifications
 
 2. **Cross-Browser Compatibility**
@@ -287,7 +290,7 @@ class LocalStorageService {
 #### Technical Requirements
 
 - [ ] No Firebase dependencies
-- [ ] Efficient localStorage usage
+- [ ] Efficient IndexedDB usage
 - [ ] Proper error handling
 - [ ] Data validation and integrity
 - [ ] Performance optimization

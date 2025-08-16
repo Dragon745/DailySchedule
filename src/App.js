@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from './firebase.config';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
 import './App.css';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import OfflineIndicator from './components/OfflineIndicator';
 import PWAUpdateNotification from './components/PWAUpdateNotification';
 
 // Components
-import Login from './components/Login';
+import UsernameInput from './components/UsernameInput';
 import Dashboard from './components/Dashboard';
 import CategoryManager from './components/CategoryManager';
 import ScheduleManager from './components/ScheduleManager';
@@ -16,80 +13,20 @@ import TimeTracker from './components/TimeTracker';
 import Analytics from './components/Analytics';
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState(null);
   const [currentView, setCurrentView] = useState('dashboard');
   const [viewHistory, setViewHistory] = useState(['dashboard']);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          setUser(user);
-          // Create or update user document
-          await createUserDocument(user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Error in auth state change:', error);
-        // Set user to null if there's an error
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
+    // Check if username is already set in localStorage
+    const savedUsername = localStorage.getItem('dailyScheduleUsername');
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
   }, []);
 
-  const createUserDocument = async (user) => {
-    try {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName || user.email.split('@')[0],
-          photoURL: user.photoURL || null,
-          createdAt: new Date(),
-          lastLoginAt: new Date(),
-          preferences: {
-            timezone: (() => {
-              try {
-                return Intl.DateTimeFormat().resolvedOptions().timeZone;
-              } catch (error) {
-                return 'UTC'; // Fallback to UTC if timezone detection fails
-              }
-            })(),
-            defaultStartTime: '09:00',
-            defaultEndTime: '17:00',
-            workDays: [1, 2, 3, 4, 5], // Monday to Friday
-            notifications: true
-          }
-        });
-      } else {
-        // Update last login
-        await setDoc(userRef, {
-          lastLoginAt: new Date()
-        }, { merge: true });
-      }
-    } catch (error) {
-      console.error('Error creating/updating user document:', error);
-      // Continue without failing the authentication
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      setCurrentView('dashboard');
-      setViewHistory(['dashboard']);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  const handleUsernameSet = (newUsername) => {
+    setUsername(newUsername);
   };
 
   const navigateToView = (view) => {
@@ -108,31 +45,20 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'categories':
-        return <CategoryManager user={user} goBack={goBack} navigateToView={navigateToView} />;
+        return <CategoryManager username={username} goBack={goBack} navigateToView={navigateToView} />;
       case 'schedules':
-        return <ScheduleManager user={user} goBack={goBack} navigateToView={navigateToView} />;
+        return <ScheduleManager username={username} goBack={goBack} navigateToView={navigateToView} />;
       case 'tracker':
-        return <TimeTracker user={user} goBack={goBack} navigateToView={navigateToView} />;
+        return <TimeTracker username={username} goBack={goBack} navigateToView={navigateToView} />;
       case 'analytics':
-        return <Analytics user={user} goBack={goBack} navigateToView={navigateToView} />;
+        return <Analytics username={username} goBack={goBack} navigateToView={navigateToView} />;
       default:
-        return <Dashboard user={user} setCurrentView={navigateToView} />;
+        return <Dashboard username={username} setCurrentView={navigateToView} />;
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-lg text-gray-600">Loading DailySchedule...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Login />;
+  if (!username) {
+    return <UsernameInput onUsernameSet={handleUsernameSet} />;
   }
 
   return (
@@ -149,21 +75,7 @@ function App() {
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-bold text-primary-600">DailySchedule</h1>
             <div className="flex items-center space-x-3">
-              {user.photoURL && (
-                <img
-                  className="h-8 w-8 rounded-full"
-                  src={user.photoURL}
-                  alt={user.displayName}
-                />
-              )}
-              <button
-                onClick={handleSignOut}
-                className="text-gray-500 hover:text-gray-700 p-2 rounded-md"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              <span className="text-sm text-gray-700">{username}</span>
             </div>
           </div>
         </div>
@@ -231,21 +143,8 @@ function App() {
             {/* User Menu */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                {user.photoURL && (
-                  <img
-                    className="h-8 w-8 rounded-full"
-                    src={user.photoURL}
-                    alt={user.displayName}
-                  />
-                )}
-                <span className="text-sm text-gray-700">{user.displayName}</span>
+                <span className="text-sm text-gray-700">{username}</span>
               </div>
-              <button
-                onClick={handleSignOut}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                Sign Out
-              </button>
             </div>
           </div>
         </div>
