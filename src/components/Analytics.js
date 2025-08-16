@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../firebase.config';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const Analytics = ({ user, goBack, navigateToView }) => {
-    // Predefined main categories (same as CategoryManager)
-    const predefinedMainCategories = [
+    // Predefined main categories (same as CategoryManager) - memoized to prevent recreation
+    const predefinedMainCategories = useMemo(() => [
         { id: 'predefined-worship-spiritual', name: 'Worship & Spiritual', color: '#8B5CF6', icon: '🙏' },
         { id: 'predefined-study-learning', name: 'Study & Learning', color: '#3B82F6', icon: '📚' },
         { id: 'predefined-work-income', name: 'Work / Income', color: '#10B981', icon: '💼' },
@@ -13,7 +13,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         { id: 'predefined-family-relationships', name: 'Family & Relationships', color: '#EC4899', icon: '👨‍👩‍👧‍👦' },
         { id: 'predefined-self-care-rest', name: 'Self-Care & Rest', color: '#06B6D4', icon: '🧘' },
         { id: 'predefined-admin-miscellaneous', name: 'Admin & Miscellaneous', color: '#6B7280', icon: '⚙️' }
-    ];
+    ], []);
 
     const [stats, setStats] = useState({
         totalTime: 0,
@@ -26,7 +26,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
     const [timeRange, setTimeRange] = useState('week'); // week, month, year
     const [error, setError] = useState(null);
 
-    const getStartDate = () => {
+    const getStartDate = useCallback(() => {
         const now = new Date();
         switch (timeRange) {
             case 'week':
@@ -38,7 +38,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
             default:
                 return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         }
-    };
+    }, [timeRange]);
 
     const loadAnalyticsData = useCallback(async () => {
         try {

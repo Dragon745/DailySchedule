@@ -60,6 +60,8 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         { value: '#059669', label: 'Teal', name: 'Teal' }
     ];
 
+
+
     const loadCategories = useCallback(async () => {
         try {
             setLoading(true);
@@ -218,7 +220,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         setShowForm(false);
     };
 
-    // Get main categories (predefined + user-created)
+    // Enhanced getMainCategories function that combines predefined and user categories
     const getMainCategories = () => {
         const userMainCategories = categories.filter(cat => cat.type === 'main');
 
@@ -249,7 +251,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         return [...predefinedFromFirestore, ...userMainCategories.filter(cat => !cat.categoryId.startsWith('predefined-'))];
     };
 
-    // Get sub-categories for a specific main category
+    // Enhanced getSubCategories function
     const getSubCategories = (parentId) => {
         return categories.filter(cat => cat.type === 'sub' && cat.parentCategoryId === parentId);
     };
