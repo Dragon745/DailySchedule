@@ -241,7 +241,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
                     <h2 className="text-lg font-semibold text-gray-800">Schedules</h2>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors flex items-center space-x-2 text-sm"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -414,7 +414,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
                                 >
                                     {editingSchedule ? 'Update Schedule' : 'Create Schedule'}
                                 </button>

@@ -111,7 +111,7 @@ const PWAInstallPrompt = () => {
             <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 max-w-sm mx-auto lg:mx-0">
                 <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
@@ -135,7 +135,7 @@ const PWAInstallPrompt = () => {
                 <div className="mt-3 flex space-x-2">
                     <button
                         onClick={deferredPrompt ? handleInstallClick : showManualInstallInstructions}
-                        className="flex-1 bg-primary-600 text-white text-sm font-medium py-2 px-3 rounded-md hover:bg-primary-700 transition-colors"
+                        className="flex-1 bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded-md hover:bg-blue-700 transition-colors"
                     >
                         {deferredPrompt ? 'Install' : 'How to Install'}
                     </button>

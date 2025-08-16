@@ -252,7 +252,7 @@ const Dashboard = ({ user, setCurrentView }) => {
                         {todaySchedules.map((schedule) => (
                             <div key={schedule.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 rounded-lg space-y-2 sm:space-y-0">
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-3 h-3 bg-primary-500 rounded-full"></div>
+                                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                                     <div>
                                         <p className="font-medium text-gray-900">{schedule.title}</p>
                                         <p className="text-sm text-gray-600">{schedule.categoryName}</p>

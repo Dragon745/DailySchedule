@@ -267,7 +267,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                     <h2 className="text-lg font-semibold text-gray-800">Categories</h2>
                     <button
                         onClick={() => setShowForm(true)}
-                        className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-600 transition-colors flex items-center space-x-2 text-sm"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -297,7 +297,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                         {/* Tree-like Category Display */}
                         <div>
                             <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-                                <span className="w-1 h-6 bg-primary rounded-full mr-3"></span>
+                                <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                                 All Categories
                             </h2>
                             <div className="space-y-3">
@@ -323,7 +323,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center space-x-2">
-                                                        <span className="text-xs px-3 py-1.5 bg-primary/10 text-primary-700 rounded-full font-medium">
+                                                        <span className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full font-medium">
                                                             Main
                                                         </span>
                                                     </div>
@@ -425,7 +425,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                                 <p className="text-gray-500 mb-6 max-w-sm mx-auto">Create your first sub-category to start organizing your activities and tracking your time effectively</p>
                                 <button
                                     onClick={() => setShowForm(true)}
-                                    className="bg-primary text-white px-8 py-3 rounded-xl font-medium hover:bg-primary-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                    className="bg-blue-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                                 >
                                     Create First Category
                                 </button>
@@ -569,7 +569,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="w-full sm:flex-1 px-6 py-4 sm:py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-base"
+                                            className="w-full sm:flex-1 px-6 py-4 sm:py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 text-base"
                                         >
                                             {editingCategory ? 'Update' : 'Create'}
                                         </button>
