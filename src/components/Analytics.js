@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase.config';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const Analytics = ({ user, goBack, navigateToView }) => {
     // Predefined main categories (same as CategoryManager)
@@ -166,7 +166,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user, timeRange]);
+    }, [user, timeRange, getStartDate, predefinedMainCategories]);
 
     useEffect(() => {
         if (user) {
@@ -214,14 +214,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         });
     };
 
-    const getTimeRangeLabel = () => {
-        switch (timeRange) {
-            case 'week': return 'Last 7 Days';
-            case 'month': return 'This Month';
-            case 'year': return 'This Year';
-            default: return 'Last 7 Days';
-        }
-    };
+    // getTimeRangeLabel function removed as it's not used
 
     if (loading) {
         return (

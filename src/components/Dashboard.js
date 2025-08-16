@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase.config';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 const Dashboard = ({ user, setCurrentView }) => {
     const [categories, setCategories] = useState([]);
@@ -15,7 +15,7 @@ const Dashboard = ({ user, setCurrentView }) => {
 
     useEffect(() => {
         loadDashboardData();
-    }, [user]);
+    }, [user, loadDashboardData]);
 
     const loadDashboardData = async () => {
         try {

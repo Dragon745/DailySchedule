@@ -64,7 +64,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         if (user) {
             loadCategories();
         }
-    }, [user]);
+    }, [user, loadCategories]);
 
     const loadCategories = async () => {
         try {
@@ -215,17 +215,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         }
     };
 
-    const handleToggleActive = async (category) => {
-        try {
-            await updateDoc(doc(db, 'categories', category.id), {
-                isActive: !category.isActive,
-                updatedAt: new Date()
-            });
-            loadCategories();
-        } catch (error) {
-            console.error('Error updating category:', error);
-        }
-    };
+    // handleToggleActive function removed as it's not used
 
     const resetForm = () => {
         setFormData({
@@ -276,10 +266,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         return categories.filter(cat => cat.type === 'sub' && cat.parentCategoryId === parentId);
     };
 
-    // Get sub-categories by parent category ID (works with both predefined and custom IDs)
-    const getSubCategoriesByParent = (parentId) => {
-        return categories.filter(cat => cat.type === 'sub' && cat.parentCategoryId === parentId);
-    };
+    // getSubCategoriesByParent function removed as it's not used
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

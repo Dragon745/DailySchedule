@@ -37,7 +37,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
 
     useEffect(() => {
         loadData();
-    }, [user]);
+    }, [user, loadData]);
 
     const loadData = async () => {
         try {
