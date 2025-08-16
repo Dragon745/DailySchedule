@@ -162,7 +162,7 @@ const Analytics = ({ username, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [username, predefinedMainCategories, getStartDate]);
+    }, [predefinedMainCategories, getStartDate]);
 
     useEffect(() => {
         loadAnalyticsData();
