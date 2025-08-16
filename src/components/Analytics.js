@@ -26,6 +26,20 @@ const Analytics = ({ user, goBack, navigateToView }) => {
     const [timeRange, setTimeRange] = useState('week'); // week, month, year
     const [error, setError] = useState(null);
 
+    const getStartDate = () => {
+        const now = new Date();
+        switch (timeRange) {
+            case 'week':
+                return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            case 'month':
+                return new Date(now.getFullYear(), now.getMonth(), 1);
+            case 'year':
+                return new Date(now.getFullYear(), 0, 1);
+            default:
+                return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        }
+    };
+
     const loadAnalyticsData = useCallback(async () => {
         try {
             setLoading(true);
@@ -166,27 +180,13 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user, timeRange, getStartDate, predefinedMainCategories]);
+    }, [user, predefinedMainCategories]);
 
     useEffect(() => {
         if (user) {
             loadAnalyticsData();
         }
     }, [user, timeRange, loadAnalyticsData]);
-
-    const getStartDate = () => {
-        const now = new Date();
-        switch (timeRange) {
-            case 'week':
-                return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            case 'month':
-                return new Date(now.getFullYear(), now.getMonth(), 1);
-            case 'year':
-                return new Date(now.getFullYear(), 0, 1);
-            default:
-                return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        }
-    };
 
     const formatTime = (minutes) => {
         if (minutes < 60) {

@@ -39,7 +39,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
         loadData();
     }, [user, loadData]);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -78,7 +78,7 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

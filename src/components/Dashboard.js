@@ -17,7 +17,7 @@ const Dashboard = ({ user, setCurrentView }) => {
         loadDashboardData();
     }, [user, loadDashboardData]);
 
-    const loadDashboardData = async () => {
+    const loadDashboardData = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -69,7 +69,7 @@ const Dashboard = ({ user, setCurrentView }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     const getCurrentTime = () => {
         const now = new Date();

@@ -66,7 +66,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         }
     }, [user, loadCategories]);
 
-    const loadCategories = async () => {
+    const loadCategories = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -102,7 +102,7 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
 
 
