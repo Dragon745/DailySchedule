@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase.config';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
@@ -12,10 +12,6 @@ const Dashboard = ({ user, setCurrentView }) => {
         todaySchedules: 0,
         completedToday: 0
     });
-
-    useEffect(() => {
-        loadDashboardData();
-    }, [user, loadDashboardData]);
 
     const loadDashboardData = useCallback(async () => {
         try {
@@ -70,6 +66,10 @@ const Dashboard = ({ user, setCurrentView }) => {
             setLoading(false);
         }
     }, [user]);
+
+    useEffect(() => {
+        loadDashboardData();
+    }, [user, loadDashboardData]);
 
     const getCurrentTime = () => {
         const now = new Date();

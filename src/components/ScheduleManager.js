@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase.config';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
 
@@ -34,10 +34,6 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
         { value: 2, label: 'Medium', color: 'text-yellow-600' },
         { value: 3, label: 'High', color: 'text-red-600' }
     ];
-
-    useEffect(() => {
-        loadData();
-    }, [user, loadData]);
 
     const loadData = useCallback(async () => {
         try {
@@ -79,6 +75,10 @@ const ScheduleManager = ({ user, goBack, navigateToView }) => {
             setLoading(false);
         }
     }, [user]);
+
+    useEffect(() => {
+        loadData();
+    }, [user, loadData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

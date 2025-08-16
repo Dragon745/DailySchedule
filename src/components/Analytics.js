@@ -180,7 +180,7 @@ const Analytics = ({ user, goBack, navigateToView }) => {
         } finally {
             setLoading(false);
         }
-    }, [user, predefinedMainCategories]);
+    }, [user, predefinedMainCategories, getStartDate]);
 
     useEffect(() => {
         if (user) {

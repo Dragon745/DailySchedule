@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase.config';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc, deleteDoc, orderBy } from 'firebase/firestore';
 
@@ -60,12 +60,6 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
         { value: '#059669', label: 'Teal', name: 'Teal' }
     ];
 
-    useEffect(() => {
-        if (user) {
-            loadCategories();
-        }
-    }, [user, loadCategories]);
-
     const loadCategories = useCallback(async () => {
         try {
             setLoading(true);
@@ -83,18 +77,6 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
             }));
             setCategories(categoriesData);
 
-
-
-            // Reload categories after initialization
-            const updatedQuerySnapshot = await getDocs(q);
-            const updatedCategoriesData = updatedQuerySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            setCategories(updatedCategoriesData);
-
-
-
             // Helper functions for hierarchical display
             // Note: These functions are now defined locally, not on window object
         } catch (error) {
@@ -103,6 +85,12 @@ const CategoryManager = ({ user, goBack, navigateToView }) => {
             setLoading(false);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            loadCategories();
+        }
+    }, [user, loadCategories]);
 
 
 
